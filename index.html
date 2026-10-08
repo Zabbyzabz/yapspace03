@@ -11,7 +11,7 @@ html,body{width:100%;height:100%;background:#fff;color:#000;font-family:'Courier
 .left{width:55%;height:100vh;overflow-y:scroll;scrollbar-width:none;}
 .left::-webkit-scrollbar{display:none;}
 .yap-wrap{padding:64px 48px 0 80px;max-width:660px;}
-.yap-wrap p{font-size:17px;line-height:2.4;letter-spacing:0.02em;margin-bottom:1.5em;}
+.yap-wrap p{font-size:17px;line-height:2.4;letter-spacing:0.02em;margin-bottom:1.5em;contain:layout style paint;}
 .word,.trigger,.motif{display:inline;opacity:0;will-change:opacity;}
 .trigger{text-decoration:underline;text-underline-offset:3px;text-decoration-style:dotted;text-decoration-color:rgba(0,0,0,0.3);cursor:none;}
 .motif{text-decoration:underline;text-underline-offset:3px;text-decoration-style:dotted;text-decoration-color:rgba(0,0,0,0.85);text-decoration-thickness:2px;cursor:none;}
@@ -560,7 +560,10 @@ async function initMic(){
     const data=new Uint8Array(analyser.frequencyBinCount);
     micDot.classList.add('on');
 
-    function loop(){
+    let lastLoopT=0;
+    function loop(t){
+      if(t-lastLoopT<33){requestAnimationFrame(loop);return;} // cap ~30fps — steadier than straining for 60 on old hardware
+      lastLoopT=t;
       analyser.getByteFrequencyData(data);
       rawVol=data.reduce((a,b)=>a+b,0)/data.length/60;
       // two smoothing rates: fast attack, slow release
